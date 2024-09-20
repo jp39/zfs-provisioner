@@ -34,7 +34,8 @@ func (z *zfsStub) SetPermissions(dataset *zfs.Dataset) error {
 
 func NewZFSProvisionerStub(stub *zfsStub) (*ZFSProvisioner, error) {
 	return &ZFSProvisioner{
-		zfs:          stub,
-		InstanceName: "test",
+		zfs:           stub,
+		InstanceName:  "test",
+		ParentDataset: "test/volumes",
 	}, nil
 }

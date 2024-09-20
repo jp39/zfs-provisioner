@@ -2,6 +2,7 @@ package provisioner
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -40,7 +41,6 @@ func TestProvisionNfs(t *testing.T) {
 		PVC:    newClaim(resource.MustParse("1G"), []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce, v1.ReadOnlyMany}),
 		StorageClass: &storagev1.StorageClass{
 			Parameters: map[string]string{
-				ParentDatasetParameter:   "test/volumes",
 				TypeParameter:            "nfs",
 				SharePropertiesParameter: expectedShareProperties,
 			},
@@ -93,14 +93,12 @@ func TestProvisionHostPath(t *testing.T) {
 		PVC:    newClaim(resource.MustParse("1G"), []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce, v1.ReadOnlyMany}),
 		StorageClass: &storagev1.StorageClass{
 			Parameters: map[string]string{
-				ParentDatasetParameter: "test/volumes",
 				TypeParameter:          "hostpath",
-				NodeNameParameter:      "node",
 			},
 			ReclaimPolicy: &policy,
 		},
 	}
-
+	os.Setenv("ZFS_NODE_NAME", "node")
 	pv, _, err := p.Provision(context.Background(), options)
 	require.NoError(t, err)
 	assertBasics(t, stub, pv, expectedDatasetName)
