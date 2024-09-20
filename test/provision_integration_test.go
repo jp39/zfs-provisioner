@@ -23,8 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	"sigs.k8s.io/sig-storage-lib-external-provisioner/v10/controller"
 
-	"github.com/ccremer/kubernetes-zfs-provisioner/pkg/provisioner"
-	"github.com/ccremer/kubernetes-zfs-provisioner/pkg/zfs"
+	"github.com/jp39/kubernetes-zfs-provisioner/pkg/provisioner"
+	"github.com/jp39/kubernetes-zfs-provisioner/pkg/zfs"
 )
 
 var (

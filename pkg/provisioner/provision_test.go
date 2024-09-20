@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	storagev1 "k8s.io/api/storage/v1"
 
-	"github.com/ccremer/kubernetes-zfs-provisioner/pkg/zfs"
+	"github.com/jp39/kubernetes-zfs-provisioner/pkg/zfs"
 
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"

@@ -3,7 +3,7 @@ package provisioner
 import (
 	"github.com/stretchr/testify/mock"
 
-	"github.com/ccremer/kubernetes-zfs-provisioner/pkg/zfs"
+	"github.com/jp39/kubernetes-zfs-provisioner/pkg/zfs"
 )
 
 type (

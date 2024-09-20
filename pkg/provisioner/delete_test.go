@@ -10,7 +10,7 @@ import (
 	core "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/ccremer/kubernetes-zfs-provisioner/pkg/zfs"
+	"github.com/jp39/kubernetes-zfs-provisioner/pkg/zfs"
 )
 
 func TestDelete_GivenVolume_WhenAnnotationCorrect_ThenDeleteZfsDataset(t *testing.T) {
