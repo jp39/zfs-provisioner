@@ -58,7 +58,7 @@ func main() {
 
 	log.Info("Connected to cluster", "host", config.Host)
 	p, err := provisioner.NewZFSProvisioner(settings.ProvisionerInstance,
-						settings.parentDataset, log)
+		settings.parentDataset, log)
 	if err != nil {
 		klog.Fatalf("Failed to create ZFS provisioner: %v", err)
 	}

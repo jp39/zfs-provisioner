@@ -20,7 +20,7 @@ func TestNewStorageClassParameters(t *testing.T) {
 			name: "GivenWrongSpec_WhenTypeInvalid_ThenThrowError",
 			args: args{
 				parameters: map[string]string{
-					TypeParameter:          "invalid",
+					TypeParameter: "invalid",
 				},
 			},
 			errContains: TypeParameter,
@@ -39,7 +39,7 @@ func TestNewStorageClassParameters(t *testing.T) {
 			name: "GivenCorrectSpec_WhenTypeNfsWithoutProperties_ThenReturnNfsParametersWithDefault",
 			args: args{
 				parameters: map[string]string{
-					TypeParameter:          "nfs",
+					TypeParameter: "nfs",
 				},
 			},
 			want: &ZFSStorageClassParameters{NFSShareProperties: "on"},
@@ -48,7 +48,7 @@ func TestNewStorageClassParameters(t *testing.T) {
 			name: "GivenCorrectSpec_WhenTypeHostPath_ThenReturnHostPathParameters",
 			args: args{
 				parameters: map[string]string{
-					TypeParameter:          "hostpath",
+					TypeParameter: "hostpath",
 				},
 			},
 			want: &ZFSStorageClassParameters{},

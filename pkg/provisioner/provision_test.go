@@ -93,7 +93,7 @@ func TestProvisionHostPath(t *testing.T) {
 		PVC:    newClaim(resource.MustParse("1G"), []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce, v1.ReadOnlyMany}),
 		StorageClass: &storagev1.StorageClass{
 			Parameters: map[string]string{
-				TypeParameter:          "hostpath",
+				TypeParameter: "hostpath",
 			},
 			ReclaimPolicy: &policy,
 		},

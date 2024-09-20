@@ -33,10 +33,10 @@ type (
 	// ZFSStorageClassParameters represents the parameters on the `StorageClass`
 	// object. It is used to ease access and validate those parameters at run time.
 	ZFSStorageClassParameters struct {
-		Type     ProvisioningType
+		Type ProvisioningType
 		// NFSShareProperties specifies additional properties to pass to 'zfs create sharenfs=%s'.
 		NFSShareProperties string
-		ReserveSpace     bool
+		ReserveSpace       bool
 	}
 )
 
@@ -61,7 +61,7 @@ func NewStorageClassParameters(parameters map[string]string) (*ZFSStorageClassPa
 	}
 
 	p := &ZFSStorageClassParameters{
-		ReserveSpace:  reserveSpace,
+		ReserveSpace: reserveSpace,
 	}
 	typeParam := parameters[TypeParameter]
 	switch typeParam {

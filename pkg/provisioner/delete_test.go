@@ -16,7 +16,7 @@ import (
 func TestDelete_GivenVolume_WhenAnnotationCorrect_ThenDeleteZfsDataset(t *testing.T) {
 	expectedDataset := "test/volumes/pv-testcreate"
 	dataset := &zfs.Dataset{
-		Name:     expectedDataset,
+		Name: expectedDataset,
 	}
 	stub := new(zfsStub)
 	stub.On("DestroyDataset", dataset, zfs.DestroyFlag(gozfs.DestroyRecursive)).

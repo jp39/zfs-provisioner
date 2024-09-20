@@ -34,9 +34,9 @@ func NewZFSProvisioner(instanceName string, parentDataset string, logger klog.Lo
 	}
 
 	return &ZFSProvisioner{
-		log: logger,
-		zfs: zfs.NewInterface(),
-		InstanceName: instanceName,
+		log:           logger,
+		zfs:           zfs.NewInterface(),
+		InstanceName:  instanceName,
 		ParentDataset: parentDataset,
 	}, nil
 }
