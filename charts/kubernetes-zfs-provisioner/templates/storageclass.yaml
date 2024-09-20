@@ -14,11 +14,8 @@ metadata:
 provisioner: {{ $.Values.provisioner.instance }}
 reclaimPolicy: {{ .policy | default "Delete" }}
 parameters:
-  parentDataset: {{ .parentDataset }}
-  hostname: {{ .hostName }}
-  type: {{ .type | default "nfs" }}
-  node: {{ .node | default "''" }}
-  shareProperties: {{ .shareProperties | default "''" }}
+  type: {{ .type | default "auto" }}
+  shareProperties: {{ .shareProperties | default "'rw,no_root_squash'" }}
   {{- if kindIs "bool" .reserveSpace }}
   reserveSpace: {{ quote .reserveSpace }}
   {{- end }}

@@ -19,17 +19,25 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       serviceAccountName: {{ include "kubernetes-zfs-provisioner.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: provisioner
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            privileged: true
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: ZFS_PROVISIONER_INSTANCE
               value: {{ .Values.provisioner.instance }}
+            - name: ZFS_PARENT_DATASET
+              value: {{ .Values.provisioner.parentDataset }}
+            - name: ZFS_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: ZFS_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           {{- with .Values.env }}
           {{- range $key, $value := . }}
             - name: {{ $key }}
@@ -39,37 +47,28 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - containerPort: 2049
+              protocol: TCP
+            - containerPort: 111
+              protocol: UDP
+            - containerPort: 32765
+              protocol: UDP
+            - containerPort: 32767
+              protocol: UDP
           volumeMounts:
-            - name: ssh
-              mountPath: {{ .Values.ssh.mountPath }}
+            - name: dev-zfs
+              mountPath: /dev/zfs
+            - name: dataset
+              mountPath: {{ .Values.provisioner.parentMountPath }}
+              mountPropagation: Bidirectional
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.hostAliases }}
-      hostAliases:
-      {{- range $ip, $hostnames := . }}
-        - ip: {{ $ip }}
-          hostnames:
-          {{- range . }}
-            - {{ . }}
-          {{- end }}
-      {{- end }}
-      {{- end }}
       volumes:
-        {{- with .Values.ssh }}
-        - name: ssh
-          secret:
-            secretName: {{ include "kubernetes-zfs-provisioner.secretName" $ }}
-            defaultMode: 0600
-        {{- end }}
-      {{- with .Values.nodeSelector }}
+        - name: dev-zfs
+          hostPath:
+            path: /dev/zfs
+        - name: dataset
+          hostPath:
+            path: {{ .Values.provisioner.parentMountPath }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+        kubernetes.io/hostname: {{ .Values.provisioner.nodeName }}

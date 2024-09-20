@@ -20,7 +20,6 @@ func TestNewStorageClassParameters(t *testing.T) {
 			name: "GivenWrongSpec_WhenParentDatasetEmpty_ThenThrowError",
 			args: args{
 				parameters: map[string]string{
-					HostnameParameter: "host",
 				},
 			},
 			errContains: ParentDatasetParameter,
@@ -30,7 +29,6 @@ func TestNewStorageClassParameters(t *testing.T) {
 			args: args{
 				parameters: map[string]string{
 					ParentDatasetParameter: "/tank",
-					HostnameParameter:      "host",
 					TypeParameter:          "nfs",
 				},
 			},
@@ -41,27 +39,16 @@ func TestNewStorageClassParameters(t *testing.T) {
 			args: args{
 				parameters: map[string]string{
 					ParentDatasetParameter: "/tank/volume/",
-					HostnameParameter:      "host",
 					TypeParameter:          "nfs",
 				},
 			},
 			errContains: ParentDatasetParameter,
 		},
 		{
-			name: "GivenWrongSpec_WhenHostnameEmpty_ThenThrowError",
-			args: args{
-				parameters: map[string]string{
-					ParentDatasetParameter: "tank",
-				},
-			},
-			errContains: HostnameParameter,
-		},
-		{
 			name: "GivenWrongSpec_WhenTypeInvalid_ThenThrowError",
 			args: args{
 				parameters: map[string]string{
 					ParentDatasetParameter: "tank",
-					HostnameParameter:      "host",
 					TypeParameter:          "invalid",
 				},
 			},
@@ -72,7 +59,6 @@ func TestNewStorageClassParameters(t *testing.T) {
 			args: args{
 				parameters: map[string]string{
 					ParentDatasetParameter:   "tank",
-					HostnameParameter:        "host",
 					TypeParameter:            "nfs",
 					SharePropertiesParameter: "rw",
 				},
@@ -84,7 +70,6 @@ func TestNewStorageClassParameters(t *testing.T) {
 			args: args{
 				parameters: map[string]string{
 					ParentDatasetParameter: "tank",
-					HostnameParameter:      "host",
 					TypeParameter:          "nfs",
 				},
 			},
@@ -95,7 +80,6 @@ func TestNewStorageClassParameters(t *testing.T) {
 			args: args{
 				parameters: map[string]string{
 					ParentDatasetParameter: "tank",
-					HostnameParameter:      "host",
 					TypeParameter:          "hostpath",
 					NodeNameParameter:      "my-node",
 				},

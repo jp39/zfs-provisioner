@@ -61,7 +61,6 @@ func (suite *ProvisionTestSuit) TearDownSuite() {
 	for _, dataset := range suite.createdDatasets {
 		err := zfs.NewInterface().DestroyDataset(&zfs.Dataset{
 			Name:     *parentDataset + "/" + dataset,
-			Hostname: "host",
 		}, zfs.DestroyRecursively)
 		require.NoError(suite.T(), err)
 	}
@@ -70,7 +69,6 @@ func (suite *ProvisionTestSuit) TearDownSuite() {
 func (suite *ProvisionTestSuit) TestDefaultProvisionDataset() {
 	dataset := provisionDataset(suite, "default", map[string]string{
 		provisioner.ParentDatasetParameter:   *parentDataset,
-		provisioner.HostnameParameter:        "localhost",
 		provisioner.TypeParameter:            "nfs",
 		provisioner.SharePropertiesParameter: "rw,no_root_squash",
 	})
@@ -80,7 +78,6 @@ func (suite *ProvisionTestSuit) TestDefaultProvisionDataset() {
 func (suite *ProvisionTestSuit) TestThickProvisionDataset() {
 	dataset := provisionDataset(suite, "thick", map[string]string{
 		provisioner.ParentDatasetParameter:   *parentDataset,
-		provisioner.HostnameParameter:        "localhost",
 		provisioner.TypeParameter:            "nfs",
 		provisioner.SharePropertiesParameter: "rw,no_root_squash",
 		provisioner.ReserveSpaceParameter:    "true",
@@ -91,7 +88,6 @@ func (suite *ProvisionTestSuit) TestThickProvisionDataset() {
 func (suite *ProvisionTestSuit) TestThinProvisionDataset() {
 	dataset := provisionDataset(suite, "thin", map[string]string{
 		provisioner.ParentDatasetParameter:   *parentDataset,
-		provisioner.HostnameParameter:        "localhost",
 		provisioner.TypeParameter:            "nfs",
 		provisioner.SharePropertiesParameter: "rw,no_root_squash",
 		provisioner.ReserveSpaceParameter:    "false",

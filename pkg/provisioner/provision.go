@@ -3,6 +3,7 @@ package provisioner
 import (
 	"context"
 	"fmt"
+	"os"
 	"slices"
 	"strconv"
 
@@ -20,7 +21,7 @@ func (p *ZFSProvisioner) Provision(ctx context.Context, options controller.Provi
 		return nil, controller.ProvisioningNoChange, fmt.Errorf("failed to parse StorageClass parameters: %w", err)
 	}
 
-	datasetPath := fmt.Sprintf("%s/%s", parameters.ParentDataset, options.PVName)
+	datasetPath := fmt.Sprintf("%s/%s", p.ParentDataset, options.PVName)
 	properties := make(map[string]string)
 
 	useHostPath := canUseHostPath(parameters, options)
@@ -48,7 +49,7 @@ func (p *ZFSProvisioner) Provision(ctx context.Context, options controller.Provi
 		properties[RefReservationProperty] = storageRequestBytes
 	}
 
-	dataset, err := p.zfs.CreateDataset(datasetPath, parameters.Hostname, properties)
+	dataset, err := p.zfs.CreateDataset(datasetPath, properties)
 	if err != nil {
 		return nil, controller.ProvisioningFinished, fmt.Errorf("creating ZFS dataset failed: %w", err)
 	}
@@ -63,7 +64,6 @@ func (p *ZFSProvisioner) Provision(ctx context.Context, options controller.Provi
 	}
 	annotations := options.PVC.Annotations
 	annotations[DatasetPathAnnotation] = dataset.Name
-	annotations[ZFSHostAnnotation] = parameters.Hostname
 
 	pv := &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
@@ -120,9 +120,10 @@ func createVolumeSource(parameters *ZFSStorageClassParameters, dataset *zfs.Data
 		}
 	}
 
+	nfsIP, _ := os.LookupEnv("ZFS_POD_IP")
 	return v1.PersistentVolumeSource{
 		NFS: &v1.NFSVolumeSource{
-			Server:   parameters.Hostname,
+			Server:   nfsIP,
 			Path:     dataset.Mountpoint,
 			ReadOnly: false,
 		},
@@ -134,10 +135,7 @@ func createNodeAffinity(parameters *ZFSStorageClassParameters, useHostPath bool)
 		return nil
 	}
 
-	node := parameters.HostPathNodeName
-	if node == "" {
-		node = parameters.Hostname
-	}
+	node, _ := os.LookupEnv("ZFS_NODE_NAME")
 	return &v1.VolumeNodeAffinity{Required: &v1.NodeSelector{NodeSelectorTerms: []v1.NodeSelectorTerm{
 		{
 			MatchExpressions: []v1.NodeSelectorRequirement{

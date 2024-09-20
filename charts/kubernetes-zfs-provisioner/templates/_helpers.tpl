@@ -62,9 +62,3 @@ Create the name of the service account to use
 {{- end -}}
 {{- end -}}
 
-{{/*
-Create the name of the secret to use
-*/}}
-{{- define "kubernetes-zfs-provisioner.secretName" -}}
-    {{ default (include "kubernetes-zfs-provisioner.fullname" .) .Values.ssh.externalSecretName }}
-{{- end -}}

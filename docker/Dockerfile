@@ -1,13 +1,8 @@
 FROM docker.io/library/alpine:3.20 as runtime
 
-ENTRYPOINT ["kubernetes-zfs-provisioner"]
+ENTRYPOINT ["/entrypoint.sh"]
 
-RUN \
-    apk add --no-cache curl bash openssh && \
-    adduser -S zfs -G root
+RUN apk add bash zfs nfs-utils
 
-COPY docker/zfs.sh /usr/bin/zfs
-COPY docker/update-permissions.sh /usr/bin/update-permissions
 COPY kubernetes-zfs-provisioner /usr/bin/
-
-USER zfs:root
+COPY entrypoint.sh /

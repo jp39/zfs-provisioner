@@ -19,6 +19,7 @@ const (
 	metricsPortKey         = "METRICS_PORT"
 	kubeConfigPathKey      = "KUBE_CONFIG_PATH"
 	provisionerInstanceKey = "PROVISIONER_INSTANCE"
+	parentDatasetKey       = "PARENT_DATASET"
 )
 
 type Settings struct {
@@ -26,6 +27,7 @@ type Settings struct {
 	MetricsPort         int
 	KubeConfigPath      string
 	ProvisionerInstance string
+	parentDataset       string
 }
 
 var (
@@ -55,7 +57,8 @@ func main() {
 	}
 
 	log.Info("Connected to cluster", "host", config.Host)
-	p, err := provisioner.NewZFSProvisioner(settings.ProvisionerInstance, log)
+	p, err := provisioner.NewZFSProvisioner(settings.ProvisionerInstance,
+						settings.parentDataset, log)
 	if err != nil {
 		klog.Fatalf("Failed to create ZFS provisioner: %v", err)
 	}
@@ -85,6 +88,7 @@ func loadEnvironmentVariables() {
 		metricsAddrKey:         "0.0.0.0",
 		kubeConfigPathKey:      "",
 		provisionerInstanceKey: "pv.kubernetes.io/zfs",
+		parentDatasetKey:       "tank/kubernetes",
 	}
 
 	for key, _ := range defaults {
@@ -98,6 +102,7 @@ func loadEnvironmentVariables() {
 		MetricsPort:         parseInt(defaults[metricsPortKey]),
 		KubeConfigPath:      defaults[kubeConfigPathKey],
 		ProvisionerInstance: defaults[provisionerInstanceKey],
+		parentDataset:       defaults[parentDatasetKey],
 	}
 }
 

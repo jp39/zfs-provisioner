@@ -15,8 +15,8 @@ import (
 type (
 	// Interface abstracts the underlying ZFS library with the minimum functionality implemented
 	Interface interface {
-		GetDataset(name string, hostname string) (*Dataset, error)
-		CreateDataset(name string, hostname string, properties map[string]string) (*Dataset, error)
+		GetDataset(name string) (*Dataset, error)
+		CreateDataset(name string, properties map[string]string) (*Dataset, error)
 		DestroyDataset(dataset *Dataset, flag DestroyFlag) error
 		SetPermissions(dataset *Dataset) error
 	}
@@ -26,7 +26,6 @@ type (
 
 		Name       string
 		Mountpoint string
-		Hostname   string
 	}
 	DestroyFlag int
 	zfsImpl     struct{}
@@ -41,13 +40,7 @@ var (
 	globalLock = sync.Mutex{}
 )
 
-func (z *zfsImpl) GetDataset(name string, hostname string) (*Dataset, error) {
-	klog.V(3).Info("acquiring lock...")
-	globalLock.Lock()
-	defer globalLock.Unlock()
-	if err := setEnvironmentVars(hostname); err != nil {
-		return nil, err
-	}
+func (z *zfsImpl) GetDataset(name string) (*Dataset, error) {
 	dataset, err := gozfs.GetDataset(name)
 	if err != nil {
 		return nil, err
@@ -56,18 +49,11 @@ func (z *zfsImpl) GetDataset(name string, hostname string) (*Dataset, error) {
 		datasetImpl: dataset,
 		Name:        dataset.Name,
 		Mountpoint:  dataset.Mountpoint,
-		Hostname:    hostname,
 	}, err
 }
 
-func (z *zfsImpl) CreateDataset(name string, hostname string, properties map[string]string) (*Dataset, error) {
-	klog.V(3).Info("acquiring lock...")
-	globalLock.Lock()
-	defer globalLock.Unlock()
-	if err := setEnvironmentVars(hostname); err != nil {
-		return nil, err
-	}
-	klog.V(3).InfoS("creating dataset", "name", name, "host", hostname)
+func (z *zfsImpl) CreateDataset(name string, properties map[string]string) (*Dataset, error) {
+	klog.V(3).InfoS("creating dataset", "name", name)
 	dataset, err := gozfs.CreateFilesystem(name, properties)
 	if err != nil {
 		return nil, err
@@ -76,7 +62,6 @@ func (z *zfsImpl) CreateDataset(name string, hostname string, properties map[str
 		datasetImpl: dataset,
 		Name:        dataset.Name,
 		Mountpoint:  dataset.Mountpoint,
-		Hostname:    hostname,
 	}, err
 }
 
@@ -85,7 +70,7 @@ func (z *zfsImpl) DestroyDataset(dataset *Dataset, flag DestroyFlag) error {
 		return err
 	}
 	if dataset.datasetImpl == nil {
-		ds, err := z.GetDataset(dataset.Name, dataset.Hostname)
+		ds, err := z.GetDataset(dataset.Name)
 		if err != nil {
 			return err
 		}
@@ -99,12 +84,6 @@ func (z *zfsImpl) DestroyDataset(dataset *Dataset, flag DestroyFlag) error {
 	default:
 		return fmt.Errorf("programmer error: flag not implemented: %d", flag)
 	}
-	klog.V(3).Info("acquiring lock...")
-	globalLock.Lock()
-	defer globalLock.Unlock()
-	if err := setEnvironmentVars(dataset.Hostname); err != nil {
-		return err
-	}
 	return dataset.datasetImpl.Destroy(destrFlag)
 }
 
@@ -116,16 +95,11 @@ func (z *zfsImpl) SetPermissions(dataset *Dataset) error {
 		return fmt.Errorf("undefined mountpoint for dataset: %s", dataset.Name)
 	}
 
-	globalLock.Lock()
-	defer globalLock.Unlock()
-	if err := setEnvironmentVars(dataset.Hostname); err != nil {
-		return err
-	}
 	cmd := exec.Command("update-permissions", dataset.Mountpoint)
 	if filepath.IsAbs(cmd.Path) {
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			return fmt.Errorf("could not update permissions on '%s': %w: %s", dataset.Hostname, err, out)
+			return fmt.Errorf("could not update permissions on '%s': %w: %s", dataset.Mountpoint, err, out)
 		}
 		return nil
 	}
@@ -155,9 +129,6 @@ func setEnvironmentVars(hostName string) error {
 func validateDataset(dataset *Dataset) error {
 	if dataset.Name == "" {
 		return errors.New("undefined dataset name")
-	}
-	if dataset.Hostname == "" {
-		return fmt.Errorf("required hostname parameter not given for dataset '%s'", dataset.Name)
 	}
 	return nil
 }

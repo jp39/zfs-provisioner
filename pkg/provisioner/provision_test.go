@@ -19,11 +19,9 @@ import (
 func TestProvisionNfs(t *testing.T) {
 
 	expectedShareProperties := "rw=@10.0.0.0/8"
-	expectedHost := "host"
 	expectedDatasetName := "test/volumes/pv-testcreate"
 	expectedDataset := &zfs.Dataset{
 		Name:       expectedDatasetName,
-		Hostname:   expectedHost,
 		Mountpoint: "/" + expectedDatasetName,
 	}
 	stub := new(zfsStub)
@@ -43,7 +41,6 @@ func TestProvisionNfs(t *testing.T) {
 		StorageClass: &storagev1.StorageClass{
 			Parameters: map[string]string{
 				ParentDatasetParameter:   "test/volumes",
-				HostnameParameter:        expectedHost,
 				TypeParameter:            "nfs",
 				SharePropertiesParameter: expectedShareProperties,
 			},
@@ -52,7 +49,7 @@ func TestProvisionNfs(t *testing.T) {
 
 	pv, _, err := p.Provision(context.Background(), options)
 	require.NoError(t, err)
-	assertBasics(t, stub, pv, expectedDatasetName, expectedHost)
+	assertBasics(t, stub, pv, expectedDatasetName)
 	assert.Contains(t, pv.Spec.AccessModes, v1.ReadWriteOnce)
 	// Pods located on other nodes can mount this PV
 	assert.Contains(t, pv.Spec.AccessModes, v1.ReadOnlyMany)
@@ -64,15 +61,13 @@ func TestProvisionNfs(t *testing.T) {
 	require.Nil(t, pv.Spec.HostPath)
 	require.Nil(t, pv.Spec.NodeAffinity)
 	assert.Equal(t, "/"+expectedDatasetName, pv.Spec.NFS.Path)
-	assert.Equal(t, expectedHost, pv.Spec.NFS.Server)
 }
 
-func assertBasics(t *testing.T, stub *zfsStub, pv *v1.PersistentVolume, expectedDataset string, expectedHost string) {
+func assertBasics(t *testing.T, stub *zfsStub, pv *v1.PersistentVolume, expectedDataset string) {
 	stub.AssertExpectations(t)
 
 	assert.Contains(t, pv.Annotations, "my/annotation")
 	assert.Equal(t, expectedDataset, pv.Annotations[DatasetPathAnnotation])
-	assert.Equal(t, expectedHost, pv.Annotations[ZFSHostAnnotation])
 }
 
 func TestProvisionHostPath(t *testing.T) {
@@ -82,7 +77,6 @@ func TestProvisionHostPath(t *testing.T) {
 		Name:       expectedDatasetName,
 		Mountpoint: "/" + expectedDatasetName,
 	}
-	expectedHost := "host"
 	policy := v1.PersistentVolumeReclaimRetain
 	stub := new(zfsStub)
 	stub.On("CreateDataset", expectedDatasetName, map[string]string{
@@ -100,7 +94,6 @@ func TestProvisionHostPath(t *testing.T) {
 		StorageClass: &storagev1.StorageClass{
 			Parameters: map[string]string{
 				ParentDatasetParameter: "test/volumes",
-				HostnameParameter:      expectedHost,
 				TypeParameter:          "hostpath",
 				NodeNameParameter:      "node",
 			},
@@ -110,7 +103,7 @@ func TestProvisionHostPath(t *testing.T) {
 
 	pv, _, err := p.Provision(context.Background(), options)
 	require.NoError(t, err)
-	assertBasics(t, stub, pv, expectedDatasetName, expectedHost)
+	assertBasics(t, stub, pv, expectedDatasetName)
 	assert.Contains(t, pv.Spec.AccessModes, v1.ReadWriteOnce)
 	// Pods located on other nodes cannot mount this PV
 	assert.NotContains(t, pv.Spec.AccessModes, v1.ReadOnlyMany)

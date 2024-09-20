@@ -15,10 +15,8 @@ import (
 
 func TestDelete_GivenVolume_WhenAnnotationCorrect_ThenDeleteZfsDataset(t *testing.T) {
 	expectedDataset := "test/volumes/pv-testcreate"
-	expectedHost := "host"
 	dataset := &zfs.Dataset{
 		Name:     expectedDataset,
-		Hostname: expectedHost,
 	}
 	stub := new(zfsStub)
 	stub.On("DestroyDataset", dataset, zfs.DestroyFlag(gozfs.DestroyRecursive)).
@@ -26,7 +24,6 @@ func TestDelete_GivenVolume_WhenAnnotationCorrect_ThenDeleteZfsDataset(t *testin
 	p, _ := NewZFSProvisionerStub(stub)
 	pv := core.PersistentVolume{ObjectMeta: v1.ObjectMeta{Annotations: map[string]string{
 		DatasetPathAnnotation: expectedDataset,
-		ZFSHostAnnotation:     expectedHost,
 	}}}
 	result := p.Delete(context.Background(), &pv)
 	require.NoError(t, result)
