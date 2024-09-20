@@ -52,7 +52,7 @@ func (suite *ProvisionTestSuit) SetupSuite() {
 	err := os.Setenv("PATH", pwd+":"+path)
 	log := klog.NewKlogr()
 	require.NoError(suite.T(), err)
-	prov, err := provisioner.NewZFSProvisioner("pv.kubernetes.io/zfs", log)
+	prov, err := provisioner.NewZFSProvisioner("pv.kubernetes.io/zfs", *parentDataset, log)
 	require.NoError(suite.T(), err)
 	suite.p = prov
 }
@@ -68,7 +68,6 @@ func (suite *ProvisionTestSuit) TearDownSuite() {
 
 func (suite *ProvisionTestSuit) TestDefaultProvisionDataset() {
 	dataset := provisionDataset(suite, "default", map[string]string{
-		provisioner.ParentDatasetParameter:   *parentDataset,
 		provisioner.TypeParameter:            "nfs",
 		provisioner.SharePropertiesParameter: "rw,no_root_squash",
 	})
@@ -77,7 +76,6 @@ func (suite *ProvisionTestSuit) TestDefaultProvisionDataset() {
 
 func (suite *ProvisionTestSuit) TestThickProvisionDataset() {
 	dataset := provisionDataset(suite, "thick", map[string]string{
-		provisioner.ParentDatasetParameter:   *parentDataset,
 		provisioner.TypeParameter:            "nfs",
 		provisioner.SharePropertiesParameter: "rw,no_root_squash",
 		provisioner.ReserveSpaceParameter:    "true",
@@ -87,7 +85,6 @@ func (suite *ProvisionTestSuit) TestThickProvisionDataset() {
 
 func (suite *ProvisionTestSuit) TestThinProvisionDataset() {
 	dataset := provisionDataset(suite, "thin", map[string]string{
-		provisioner.ParentDatasetParameter:   *parentDataset,
 		provisioner.TypeParameter:            "nfs",
 		provisioner.SharePropertiesParameter: "rw,no_root_squash",
 		provisioner.ReserveSpaceParameter:    "false",
