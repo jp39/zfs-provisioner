@@ -3,9 +3,9 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: '{{ include "kubernetes-zfs-provisioner.fullname" . }}-controller'
+  name: '{{ include "zfs-provisioner.fullname" . }}-controller'
   labels:
-    {{- include "kubernetes-zfs-provisioner.labels" . | nindent 4 }}
+    {{- include "zfs-provisioner.labels" . | nindent 4 }}
 rules:
 # leader election
   - apiGroups:
@@ -87,15 +87,15 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "kubernetes-zfs-provisioner.fullname" . }}
+  name: {{ include "zfs-provisioner.fullname" . }}
   labels:
-    {{- include "kubernetes-zfs-provisioner.labels" . | nindent 4 }}
+    {{- include "zfs-provisioner.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: '{{ include "kubernetes-zfs-provisioner.fullname" . }}-controller'
+  name: '{{ include "zfs-provisioner.fullname" . }}-controller'
 subjects:
 - kind: ServiceAccount
-  name: {{ include "kubernetes-zfs-provisioner.serviceAccountName" . }}
+  name: {{ include "zfs-provisioner.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 {{- end -}}

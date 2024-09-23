@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/jp39/kubernetes-zfs-provisioner/pkg/zfs"
+	"github.com/jp39/zfs-provisioner/pkg/zfs"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

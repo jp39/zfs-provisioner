@@ -72,9 +72,9 @@ release:
   prerelease: auto
   github:
     owner: jp39
-    name: kubernetes-zfs-provisioner
+    name: zfs-provisioner
 
 git:
   ignore_tags:
     - "chart/*"
-    - "kubernetes-zfs-provisioner-*"
+    - "zfs-provisioner-*"

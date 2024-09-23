@@ -11,6 +11,6 @@
     "gomodTidy"
   ],
   "prBodyNotes": [
-    "- [ ] PR contains the label that identifies the area, one of: `area:provisioner`, `area:chart`\n- [ ] If the PR is targeting a Helm chart, add the chart label, e.g. `chart:kubernetes-zfs-provisioner`"
+    "- [ ] PR contains the label that identifies the area, one of: `area:provisioner`, `area:chart`\n- [ ] If the PR is targeting a Helm chart, add the chart label, e.g. `chart:zfs-provisioner`"
   ]
 }

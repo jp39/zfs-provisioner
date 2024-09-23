@@ -10,6 +10,6 @@
 ## Installation
 
 ```bash
-helm repo add zfs-provisioner https://jp39.github.io/kubernetes-zfs-provisioner
+helm repo add zfs-provisioner https://jp39.github.io/zfs-provisioner
 helm install {{ template "chart.name" . }} zfs-provisioner/{{ template "chart.name" . }}
 ```

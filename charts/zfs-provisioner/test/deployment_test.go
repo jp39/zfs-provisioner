@@ -58,7 +58,7 @@ func Test_Deployment_ShouldRender_SshVolumes_IfEnabled(t *testing.T) {
 		Name: "ssh",
 		VolumeSource: v1.VolumeSource{
 			Secret: &v1.SecretVolumeSource{
-				SecretName:  releaseName + "-kubernetes-zfs-provisioner",
+				SecretName:  releaseName + "-zfs-provisioner",
 				DefaultMode: getIntPointer(0600),
 			},
 		},

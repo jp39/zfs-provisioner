@@ -9,7 +9,7 @@ bin
 .env
 kube.conf
 
-/kubernetes-zfs-provisioner
+/zfs-provisioner
 /.zpool
 /.work
 /.github/release-notes.md

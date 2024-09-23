@@ -4,5 +4,5 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 RUN apk add bash zfs nfs-utils
 
-COPY kubernetes-zfs-provisioner /usr/bin/
+COPY zfs-provisioner /usr/bin/
 COPY docker/entrypoint.sh /

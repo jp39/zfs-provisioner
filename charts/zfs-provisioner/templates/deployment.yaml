@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "kubernetes-zfs-provisioner.fullname" . }}
+  name: {{ include "zfs-provisioner.fullname" . }}
   labels:
-    {{- include "kubernetes-zfs-provisioner.labels" . | nindent 4 }}
+    {{- include "zfs-provisioner.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "kubernetes-zfs-provisioner.selectorLabels" . | nindent 6 }}
+      {{- include "zfs-provisioner.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "kubernetes-zfs-provisioner.selectorLabels" . | nindent 8 }}
+        {{- include "zfs-provisioner.selectorLabels" . | nindent 8 }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-      serviceAccountName: {{ include "kubernetes-zfs-provisioner.serviceAccountName" . }}
+      serviceAccountName: {{ include "zfs-provisioner.serviceAccountName" . }}
       containers:
         - name: provisioner
           securityContext:

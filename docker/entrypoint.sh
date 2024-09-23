@@ -6,4 +6,4 @@ rpc.mountd --port 32767
 rpc.idmapd
 rpc.nfsd --tcp --udp --port 2049 8
 
-exec /usr/bin/kubernetes-zfs-provisioner
+exec /usr/bin/zfs-provisioner

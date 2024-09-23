@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jp39/kubernetes-zfs-provisioner/pkg/zfs"
+	"github.com/jp39/zfs-provisioner/pkg/zfs"
 	core "k8s.io/api/core/v1"
 )
 
