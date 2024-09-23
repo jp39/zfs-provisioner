@@ -30,7 +30,7 @@ provisioner:
 
 storageClass:
   # -- Whether to create storage classes for this provisioner.
-  create: false
+  create: true
   # -- Storage classes to create. See [values.yaml](values.yaml) for an example.
   classes:
     - name: zfs
@@ -61,7 +61,7 @@ serviceAccount:
 rbac:
   # -- **Required for first time deployments** Grant the service account
   # the necessary permissions,
-  create: false
+  create: true
 
 resources:
   limits:
