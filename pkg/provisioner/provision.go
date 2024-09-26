@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/sig-storage-lib-external-provisioner/v10/controller"
 )
 
-// Provision creates a PersistentVolume, sets quota and shares it via NFS.
+// Provision creates a PersistentVolume, sets quota.
 func (p *ZFSProvisioner) Provision(ctx context.Context, options controller.ProvisionOptions) (*v1.PersistentVolume, controller.ProvisioningState, error) {
 	parameters, err := NewStorageClassParameters(options.StorageClass.Parameters)
 	if err != nil {
@@ -24,9 +24,9 @@ func (p *ZFSProvisioner) Provision(ctx context.Context, options controller.Provi
 	datasetPath := fmt.Sprintf("%s/%s", p.ParentDataset, options.PVName)
 	properties := make(map[string]string)
 
-	useHostPath := canUseHostPath(parameters, options)
-	if !useHostPath {
-		properties[ShareNfsProperty] = parameters.NFSShareProperties
+	if !slices.Contains(options.PVC.Spec.AccessModes, v1.ReadWriteOnce) &&
+		!slices.Contains(options.PVC.Spec.AccessModes, v1.ReadWriteOncePod) {
+		return nil, controller.ProvisioningFinished, fmt.Errorf("ReadOnlyMany or ReadWriteMany access modes are not supported by this provisioner")
 	}
 
 	var reclaimPolicy v1.PersistentVolumeReclaimPolicy
@@ -73,68 +73,35 @@ func (p *ZFSProvisioner) Provision(ctx context.Context, options controller.Provi
 		},
 		Spec: v1.PersistentVolumeSpec{
 			PersistentVolumeReclaimPolicy: reclaimPolicy,
-			AccessModes:                   createAccessModes(options, useHostPath),
+			AccessModes:                   createAccessModes(options),
 			Capacity: v1.ResourceList{
 				v1.ResourceStorage: options.PVC.Spec.Resources.Requests[v1.ResourceStorage],
 			},
-			PersistentVolumeSource: createVolumeSource(parameters, dataset, useHostPath),
-			NodeAffinity:           createNodeAffinity(parameters, useHostPath),
+			PersistentVolumeSource: createVolumeSource(parameters, dataset),
+			NodeAffinity:           createNodeAffinity(parameters),
 		},
 	}
 	return pv, controller.ProvisioningFinished, nil
 }
 
-func canUseHostPath(parameters *ZFSStorageClassParameters, options controller.ProvisionOptions) bool {
-	switch parameters.Type {
-	case Nfs:
-		return false
-	case HostPath:
-		return true
-	case Auto:
-		if !slices.Contains(options.PVC.Spec.AccessModes, v1.ReadOnlyMany) && !slices.Contains(options.PVC.Spec.AccessModes, v1.ReadWriteMany) {
-			return true
-		}
-	}
-	return false
-}
-
-func createAccessModes(options controller.ProvisionOptions, useHostPath bool) []v1.PersistentVolumeAccessMode {
+func createAccessModes(options controller.ProvisionOptions) []v1.PersistentVolumeAccessMode {
 	if slices.Contains(options.PVC.Spec.AccessModes, v1.ReadWriteOncePod) {
 		return []v1.PersistentVolumeAccessMode{v1.ReadWriteOncePod}
 	}
-	accessModes := []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce}
-	if !useHostPath {
-		accessModes = append(accessModes, v1.ReadOnlyMany, v1.ReadWriteMany)
-	}
-	return accessModes
+	return []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce}
 }
 
-func createVolumeSource(parameters *ZFSStorageClassParameters, dataset *zfs.Dataset, useHostPath bool) v1.PersistentVolumeSource {
-	if useHostPath {
-		hostPathType := v1.HostPathDirectory
-		return v1.PersistentVolumeSource{
-			HostPath: &v1.HostPathVolumeSource{
-				Path: dataset.Mountpoint,
-				Type: &hostPathType,
-			},
-		}
-	}
-
-	nfsIP, _ := os.LookupEnv("ZFS_POD_IP")
+func createVolumeSource(parameters *ZFSStorageClassParameters, dataset *zfs.Dataset) v1.PersistentVolumeSource {
+	hostPathType := v1.HostPathDirectory
 	return v1.PersistentVolumeSource{
-		NFS: &v1.NFSVolumeSource{
-			Server:   nfsIP,
-			Path:     dataset.Mountpoint,
-			ReadOnly: false,
+		HostPath: &v1.HostPathVolumeSource{
+			Path: dataset.Mountpoint,
+			Type: &hostPathType,
 		},
 	}
 }
 
-func createNodeAffinity(parameters *ZFSStorageClassParameters, useHostPath bool) *v1.VolumeNodeAffinity {
-	if !useHostPath {
-		return nil
-	}
-
+func createNodeAffinity(parameters *ZFSStorageClassParameters) *v1.VolumeNodeAffinity {
 	node, _ := os.LookupEnv("ZFS_NODE_NAME")
 	return &v1.VolumeNodeAffinity{Required: &v1.NodeSelector{NodeSelectorTerms: []v1.NodeSelectorTerm{
 		{

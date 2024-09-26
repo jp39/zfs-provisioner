@@ -2,9 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# -- Usually `1` is fine
-replicaCount: 1
-
 image:
   # -- Location of the container image
   repository: jp39/zfs-provisioner
@@ -36,10 +33,6 @@ storageClass:
     - name: zfs
       # -- The reclaim policy supported by the provisioner
       policy: "Delete"
-      # -- NFS export properties (see `exports(5)`)
-      shareProperties: "rw,no_root_squash"
-      # -- Provision type, one of [`nfs`, `hostpath`, `auto`]
-      type: "auto"
       # -- Reserve space for created datasets. Default is true. Use false to enable thin provisioning
       reserveSpace: true
       # -- Annotations for the storage class
