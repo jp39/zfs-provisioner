@@ -24,9 +24,9 @@ build\:docker: build ## Builds the docker image
 	docker build -t $(IMAGE_REPOSITORY):$(IMAGE_TAG) -f docker/Dockerfile .
 
 .PHONY: install\:zfs
-install\:zfs: ## Installs zfs-on-linux and nfs-kernel-server (requires sudo)
+install\:zfs: ## Installs zfs-on-linux (requires sudo)
 	sudo apt update
-	sudo apt install -y zfsutils-linux nfs-kernel-server
+	sudo apt install -y zfsutils-linux
 
 $(zpool_dir):
 	mkdir $(zpool_dir)

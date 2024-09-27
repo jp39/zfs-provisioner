@@ -14,8 +14,6 @@ metadata:
 provisioner: {{ $.Values.provisioner.instance }}
 reclaimPolicy: {{ .policy | default "Delete" }}
 parameters:
-  type: {{ .type | default "auto" }}
-  shareProperties: {{ .shareProperties | default "'rw,no_root_squash'" }}
   {{- if kindIs "bool" .reserveSpace }}
   reserveSpace: {{ quote .reserveSpace }}
   {{- end }}

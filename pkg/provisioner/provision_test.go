@@ -17,52 +17,6 @@ import (
 	"sigs.k8s.io/sig-storage-lib-external-provisioner/v10/controller"
 )
 
-func TestProvisionNfs(t *testing.T) {
-
-	expectedShareProperties := "rw=@10.0.0.0/8"
-	expectedDatasetName := "test/volumes/pv-testcreate"
-	expectedDataset := &zfs.Dataset{
-		Name:       expectedDatasetName,
-		Mountpoint: "/" + expectedDatasetName,
-	}
-	stub := new(zfsStub)
-	stub.On("CreateDataset", expectedDatasetName, map[string]string{
-		RefQuotaProperty:       "1000000000",
-		RefReservationProperty: "1000000000",
-		"sharenfs":             "rw=@10.0.0.0/8",
-		ManagedByProperty:      "test",
-		ReclaimPolicyProperty:  string(v1.PersistentVolumeReclaimDelete),
-	}).Return(expectedDataset, nil)
-	stub.On("SetPermissions", expectedDataset).Return(nil)
-
-	p, _ := NewZFSProvisionerStub(stub)
-	options := controller.ProvisionOptions{
-		PVName: "pv-testcreate",
-		PVC:    newClaim(resource.MustParse("1G"), []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce, v1.ReadOnlyMany}),
-		StorageClass: &storagev1.StorageClass{
-			Parameters: map[string]string{
-				TypeParameter:            "nfs",
-				SharePropertiesParameter: expectedShareProperties,
-			},
-		},
-	}
-
-	pv, _, err := p.Provision(context.Background(), options)
-	require.NoError(t, err)
-	assertBasics(t, stub, pv, expectedDatasetName)
-	assert.Contains(t, pv.Spec.AccessModes, v1.ReadWriteOnce)
-	// Pods located on other nodes can mount this PV
-	assert.Contains(t, pv.Spec.AccessModes, v1.ReadOnlyMany)
-	assert.Contains(t, pv.Spec.AccessModes, v1.ReadWriteMany)
-
-	assert.Equal(t, v1.PersistentVolumeReclaimDelete, pv.Spec.PersistentVolumeReclaimPolicy)
-
-	require.NotNil(t, pv.Spec.NFS)
-	require.Nil(t, pv.Spec.HostPath)
-	require.Nil(t, pv.Spec.NodeAffinity)
-	assert.Equal(t, "/"+expectedDatasetName, pv.Spec.NFS.Path)
-}
-
 func assertBasics(t *testing.T, stub *zfsStub, pv *v1.PersistentVolume, expectedDataset string) {
 	stub.AssertExpectations(t)
 
@@ -70,7 +24,7 @@ func assertBasics(t *testing.T, stub *zfsStub, pv *v1.PersistentVolume, expected
 	assert.Equal(t, expectedDataset, pv.Annotations[DatasetPathAnnotation])
 }
 
-func TestProvisionHostPath(t *testing.T) {
+func TestProvision(t *testing.T) {
 
 	expectedDatasetName := "test/volumes/pv-testcreate"
 	expectedDataset := &zfs.Dataset{
@@ -92,9 +46,7 @@ func TestProvisionHostPath(t *testing.T) {
 		PVName: "pv-testcreate",
 		PVC:    newClaim(resource.MustParse("1G"), []v1.PersistentVolumeAccessMode{v1.ReadWriteOnce, v1.ReadOnlyMany}),
 		StorageClass: &storagev1.StorageClass{
-			Parameters: map[string]string{
-				TypeParameter: "hostpath",
-			},
+			Parameters:    map[string]string{},
 			ReclaimPolicy: &policy,
 		},
 	}

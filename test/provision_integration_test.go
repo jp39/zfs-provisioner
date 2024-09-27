@@ -3,14 +3,12 @@
 package test
 
 import (
-	"bufio"
 	"context"
 	"flag"
 	"k8s.io/klog/v2"
 	"math/rand"
 	"os"
 	"strconv"
-	"strings"
 	"testing"
 
 	gozfs "github.com/mistifyio/go-zfs/v3"
@@ -67,17 +65,12 @@ func (suite *ProvisionTestSuit) TearDownSuite() {
 }
 
 func (suite *ProvisionTestSuit) TestDefaultProvisionDataset() {
-	dataset := provisionDataset(suite, "default", map[string]string{
-		provisioner.TypeParameter:            "nfs",
-		provisioner.SharePropertiesParameter: "rw,no_root_squash",
-	})
+	dataset := provisionDataset(suite, "default", map[string]string{})
 	assertZfsReservation(suite.T(), dataset, true)
 }
 
 func (suite *ProvisionTestSuit) TestThickProvisionDataset() {
 	dataset := provisionDataset(suite, "thick", map[string]string{
-		provisioner.TypeParameter:            "nfs",
-		provisioner.SharePropertiesParameter: "rw,no_root_squash",
 		provisioner.ReserveSpaceParameter:    "true",
 	})
 	assertZfsReservation(suite.T(), dataset, true)
@@ -85,8 +78,6 @@ func (suite *ProvisionTestSuit) TestThickProvisionDataset() {
 
 func (suite *ProvisionTestSuit) TestThinProvisionDataset() {
 	dataset := provisionDataset(suite, "thin", map[string]string{
-		provisioner.TypeParameter:            "nfs",
-		provisioner.SharePropertiesParameter: "rw,no_root_squash",
 		provisioner.ReserveSpaceParameter:    "false",
 	})
 	assertZfsReservation(suite.T(), dataset, false)
@@ -111,7 +102,6 @@ func provisionDataset(suite *ProvisionTestSuit, name string, parameters map[stri
 	suite.createdDatasets = append(suite.createdDatasets, pvName)
 	assert.NoError(t, err)
 	require.DirExists(t, datasetDirectory)
-	assertNfsExport(t, datasetDirectory)
 	return fullDataset
 }
 
@@ -130,25 +120,6 @@ func assertZfsReservation(t *testing.T, datasetName string, reserve bool) {
 	} else {
 		assert.Equal(t, "none", refreserved)
 	}
-}
-
-func assertNfsExport(t *testing.T, fullDataset string) {
-	file, err := os.Open("/var/lib/nfs/etab")
-	require.NoError(t, err)
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	require.NoError(t, err)
-	found := false
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, fullDataset) {
-			found = true
-			assert.Contains(t, line, "rw")
-			assert.Contains(t, line, "no_root_squash")
-		}
-	}
-	assert.True(t, found)
 }
 
 func newClaim(capacity resource.Quantity, accessModes []v1.PersistentVolumeAccessMode) *v1.PersistentVolumeClaim {
