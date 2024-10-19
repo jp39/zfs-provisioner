@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -eo pipefail
-
-zfs_bin=${ZFS_BIN:-/sbin/zfs}
-
-${zfs_bin} ${@}
