@@ -1,61 +1,31 @@
-# Default values for zfs-provisioner.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 image:
-  # -- Location of the container image
   repository: jp39/zfs-provisioner
-  # -- Container image registry
   registry: ghcr.io
-  # -- Container image tag
-  tag: v0
+  tag: 1.0.0
   pullPolicy: Always
-
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
+nameOverride: ''
+fullnameOverride: ''
 provisioner:
-  # -- Provisoner instance name if multiple are running (multiple
-  # instances are not required for managing multiple ZFS hosts)
   instance: pv.kubernetes.io/zfs
-  # -- Existing dataset on the ZFS node
-  parentDataset: "tank/kubernetes"
-  parentMountPath: "/tank/kubernetes"
-  # -- Required. ZFS node.
-  nodeName: ""
-
+  parentDataset: tank/kubernetes
+  parentMountPath: /tank/kubernetes
+  nodeName: ''
 storageClass:
-  # -- Whether to create storage classes for this provisioner.
   create: true
-  # -- Storage classes to create. See [values.yaml](values.yaml) for an example.
   classes:
     - name: zfs
-      # -- The reclaim policy supported by the provisioner
-      policy: "Delete"
-      # -- Reserve space for created datasets. Default is true. Use false to enable thin provisioning
+      policy: Delete
       reserveSpace: true
-      # -- Annotations for the storage class
       annotations:
-        storageclass.kubernetes.io/is-default-class: "true"
-
-# -- A dict with KEY: VALUE pairs
+        storageclass.kubernetes.io/is-default-class: 'true'
 env: {}
-
 serviceAccount:
-  # -- Specifies whether a service account should be created
   create: true
-  # -- Annotations to add to the service account
   annotations: {}
-  # -- The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
+  name: ''
 rbac:
-  # -- **Required for first time deployments** Grant the service account
-  # the necessary permissions,
   create: true
-
 resources:
   limits:
     memory: 40Mi
